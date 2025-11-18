@@ -1,44 +1,50 @@
-// ms-tutorias/src/infrastructure/clients/usuarios.client.js
 const axios = require('axios');
 const { usuariosServiceUrl } = require('../../config');
+const CircuitBreaker = require('opossum');
+const { track } = require('../../utils/dashboard'); // asegúrate de tener esta función
 
-const getUsuario = async (tipo, id, correlationId) => {
-    // Construimos la URL
+// Función original, solo agregamos timeout
+const callUsuarioService = async (tipo, id, correlationId) => {
     const url = `${usuariosServiceUrl}/${tipo}/${id}`;
-
-    // --- LOGS DE DEPURACIÓN ---
     console.log(`[SUPER-DEBUG] Iniciando llamada a getUsuario con Correlation-ID: ${correlationId}`);
     console.log(`[SUPER-DEBUG] URL de destino: ${url}`);
     console.log(`[SUPER-DEBUG] Tipo: ${tipo}, ID: ${id}`);
-    // --- FIN LOGS DE DEPURACIÓN ---
 
     try {
         const response = await axios.get(url, {
-            headers: { 'X-Correlation-ID': correlationId }
+            headers: { 'X-Correlation-ID': correlationId },
+            timeout: 1500 // <--- timeout de 1.5s
         });
         console.log(`[SUPER-DEBUG] Éxito en la llamada a ${url}. Status: ${response.status}`);
         return response.data;
     } catch (error) {
-        // --- LOGS DE ERROR DETALLADOS ---
         console.error(`[SUPER-DEBUG] FALLO en la llamada a ${url}.`);
         if (error.response) {
-            // Este bloque se ejecuta si el servidor SÍ respondió, pero con un error (4xx, 5xx)
-            console.error(`[SUPER-DEBUG] El servidor respondió con Status: ${error.response.status}`);
-            console.error(`[SUPER-DEBUG] Data del error:`, JSON.stringify(error.response.data));
-            if (error.response.status === 404) {
-                return null;
-            }
-        } else if (error.request) {
-            // Este bloque se ejecuta si la petición se hizo pero NUNCA se recibió respuesta (error de red)
-            console.error('[SUPER-DEBUG] La petición fue enviada pero no se recibió respuesta. Error de red (timeout, DNS, etc).');
-        } else {
-            // Este bloque se ejecuta si hubo un error al configurar la petición antes de enviarla
-            console.error('[SUPER-DEBUG] Error fatal al configurar la petición axios:', error.message);
+            console.error(`[SUPER-DEBUG] Status: ${error.response.status}`);
+            console.error(`[SUPER-DEBUG] Data:`, JSON.stringify(error.response.data));
+            if (error.response.status === 404) return null;
         }
-        console.error('[SUPER-DEBUG] Objeto de error completo de Axios:', error.code, error.message);
-        // --- FIN LOGS DE ERROR DETALLADOS ---
         throw error;
     }
 };
+
+// --- Opciones mínimas del Circuit Breaker ---
+const options = {
+    timeout: 2000,                // tiempo máximo antes de considerar fallo
+    errorThresholdPercentage: 50, // % de fallos para abrir el breaker
+    resetTimeout: 10000           // reintento de cierre después de 10s
+};
+
+// Crear CircuitBreaker
+const breaker = new CircuitBreaker(callUsuarioService, options);
+
+// Evento para reporte al dashboard
+breaker.on('open', () => {
+    console.error('Circuit Breaker ABIERTO para ms-usuarios');
+    track('cb-ms-usuarios', 'Circuit Breaker ABIERTO para ms-usuarios', 'ERROR');
+});
+
+// Exportar función usando el breaker
+const getUsuario = (tipo, id, correlationId) => breaker.fire(tipo, id, correlationId);
 
 module.exports = { getUsuario };
