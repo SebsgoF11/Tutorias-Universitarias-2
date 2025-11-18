@@ -17,6 +17,27 @@ const usersDB = [
         passwordHash: "$2a$10$gKxWS9CIu7QUq9ySaw6cSuns8gXvY/x/ynjj/X.giRWgN4jBuQ46W", // Contraseña: "password_elena"
         name: "Dra. Elena Solano",
         role: "tutor"
+    },
+    {
+	    id: "e67890",
+    	username: "luis.garcia",
+    	passwordHash: "$2b$10$MRuItC4fZTP6YGvH.m7kReQ1QfKXKFy6HxLvKm4NYuREYG5alD/nm", 
+    	name: "Luis García",
+    	role: "student"
+    },
+    {
+	    id: "e98765",
+	    username: "leo.patino",
+	    passwordHash: "$2b$10$BmMrQPU6i/eyV4yJAWGkQOuZXmed1ZJWnNkcOCAIv98TU6cHtWk3q",
+	    name: "Leo Patino",
+	    role: "student"
+    },
+    {
+	    id: "t09876",
+	    username: "carlos.rojas",
+	    passwordHash: "$2b$12$.VULeFDAc3Z2O8ZsmajSnOkK2.O1hmQ9omVxTQ3sooPvRkPkuCIQ.",
+	    name: "Carlos Rojas",
+	    role: "tutor"
     }
 ];
 
