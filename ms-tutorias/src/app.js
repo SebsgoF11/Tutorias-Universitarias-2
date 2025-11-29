@@ -27,7 +27,6 @@ client.collectDefaultMetrics({
     register,
 });
 
-// Endpoint donde Prometheus va a obtener métricas
 app.get('/metrics', async (req, res) => {
     try {
         res.setHeader('Content-Type', register.contentType);

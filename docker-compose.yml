@@ -12,7 +12,7 @@ services:
       - JWT_SECRET=ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD
       - JWT_EXPIRES_IN=1h
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Usuarios ---
   ms-usuarios:
@@ -32,7 +32,7 @@ services:
       - db-usuarios
       - rabbitmq
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Agenda ---
   ms-agenda:
@@ -52,7 +52,7 @@ services:
       - db-agenda
       - rabbitmq
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Message Broker ---
   rabbitmq:
@@ -67,7 +67,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Notificaciones ---
   ms-notificaciones:
@@ -80,7 +80,7 @@ services:
     depends_on:
       - rabbitmq # Asegura que RabbitMQ inicie antes que este servicio
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Tutorías (El Orquestador) ---
   ms-tutorias:
@@ -111,7 +111,7 @@ services:
       - db-tutorias
       - rabbitmq # Asegura que RabbitMQ inicie antes que este servicio
     networks:
-      - observability
+      - tracking
 
   # --- Cliente Web Interactivo ---
   client-sim:
@@ -128,7 +128,7 @@ services:
       - ms-auth
       - ms-tutorias
     networks:
-      - observability
+      - tracking
 
   # --- Dashboard de Trazabilidad ---
   tracking-dashboard:
@@ -142,7 +142,7 @@ services:
     depends_on:
       - rabbitmq
     networks:
-      - observability
+      - tracking
 
   # --- Servicio de Base de Datos PostgreSQL ---
   db-usuarios:
@@ -157,7 +157,7 @@ services:
     volumes:
       - postgres_data_usuarios:/var/lib/postgresql/data # Persiste los datos fuera del contenedor
     networks:
-      - observability
+      - tracking
 
   db-agenda:
     image: postgres:14-alpine
@@ -171,7 +171,7 @@ services:
     volumes:
       - postgres_data_agenda:/var/lib/postgresql/data
     networks:
-      - observability
+      - tracking
 
   db-tutorias:
     image: postgres:14-alpine
@@ -185,7 +185,7 @@ services:
     volumes:
       - postgres_data_tutorias:/var/lib/postgresql/data
     networks:
-      - observability
+      - tracking
   
   toxiproxy:
     image: shopify/toxiproxy
@@ -194,7 +194,7 @@ services:
     - "8474:8474"    # API de Toxiproxy
     - "8666:8666"    # Puerto de proxy para ms-usuarios
     networks:
-      - observability
+      - tracking
 
   prometheus:
     image: prom/prometheus
@@ -209,7 +209,7 @@ services:
       - ms-agenda
       - ms-notificaciones
     networks:
-      - observability
+      - tracking
 
   grafana:
     image: grafana/grafana-oss
@@ -224,7 +224,7 @@ services:
     depends_on:
       - prometheus
     networks:
-      - observability
+      - tracking
 
 
 # --- Definición de Volúmenes ---
@@ -236,5 +236,5 @@ volumes:
   grafana_data:
 
 networks:
-  observability:
+  tracking:
     driver: bridge

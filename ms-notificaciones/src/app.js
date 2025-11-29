@@ -19,12 +19,9 @@ app.use(express.json());
 app.use(correlationIdMiddleware); // Middleware para manejar el Correlation ID
 app.use('/notificaciones', notificacionesRouter);
 
-// Mantenemos la API (quizás para futuras rutas /status)
-// const notificacionesRouter = require('./api/routes/notificaciones.routes');
-// app.use('/notificaciones', notificacionesRouter); // <-- Comentamos esto, ya no recibimos POSTs
 app.use(errorHandler);
 
-// --- Lógica del Consumidor de RabbitMQ ---
+
 const startConsumer = async () => {
     let connection;
     try {
