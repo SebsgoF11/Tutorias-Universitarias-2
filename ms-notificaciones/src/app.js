@@ -10,6 +10,10 @@ const messageProducer = require('./infrastructure/messaging/message.producer'); 
 
 const PORT = process.env.PORT || 3003;
 
+const client = require("prom-client");
+const Registry = client.Registry;
+const register = new Registry();
+
 const app = express();
 app.use(express.json());
 app.use(correlationIdMiddleware); // Middleware para manejar el Correlation ID
@@ -68,6 +72,18 @@ const startConsumer = async () => {
         setTimeout(startConsumer, 5000); // Reintentar conexión en 5 segundos
     }
 };
+
+client.collectDefaultMetrics({ register });
+
+app.get("/metrics", async (req, res) => {
+  try {
+    res.set("Content-Type", register.contentType);
+    res.send(await register.metrics());
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+});
+
 
 // app.listen(PORT, () => {
 //     console.log(`MS_Notificaciones escuchando en el puerto ${PORT}`);

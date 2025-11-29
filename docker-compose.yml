@@ -11,6 +11,8 @@ services:
       - PORT=4000
       - JWT_SECRET=ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD
       - JWT_EXPIRES_IN=1h
+    networks:
+      - observability
 
   # --- Servicio de Usuarios ---
   ms-usuarios:
@@ -29,6 +31,8 @@ services:
     depends_on: # Asegura que la BD inicie antes que el servicio
       - db-usuarios
       - rabbitmq
+    networks:
+      - observability
 
   # --- Servicio de Agenda ---
   ms-agenda:
@@ -47,6 +51,8 @@ services:
     depends_on: # Depende de su propia BD
       - db-agenda
       - rabbitmq
+    networks:
+      - observability
 
   # --- Servicio de Message Broker ---
   rabbitmq:
@@ -60,6 +66,8 @@ services:
       - RABBITMQ_DEFAULT_PASS=rabbit # Contraseña por defecto
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq/
+    networks:
+      - observability
 
   # --- Servicio de Notificaciones ---
   ms-notificaciones:
@@ -71,6 +79,8 @@ services:
       - RABBITMQ_URL=amqp://rabbit:rabbit@rabbitmq:5672 # URL de conexión a RabbitMQ
     depends_on:
       - rabbitmq # Asegura que RabbitMQ inicie antes que este servicio
+    networks:
+      - observability
 
   # --- Servicio de Tutorías (El Orquestador) ---
   ms-tutorias:
@@ -100,6 +110,8 @@ services:
       - ms-notificaciones
       - db-tutorias
       - rabbitmq # Asegura que RabbitMQ inicie antes que este servicio
+    networks:
+      - observability
 
   # --- Cliente Web Interactivo ---
   client-sim:
@@ -115,6 +127,8 @@ services:
     depends_on:
       - ms-auth
       - ms-tutorias
+    networks:
+      - observability
 
   # --- Dashboard de Trazabilidad ---
   tracking-dashboard:
@@ -127,6 +141,8 @@ services:
       - RABBITMQ_URL=amqp://rabbit:rabbit@rabbitmq:5672
     depends_on:
       - rabbitmq
+    networks:
+      - observability
 
   # --- Servicio de Base de Datos PostgreSQL ---
   db-usuarios:
@@ -140,6 +156,8 @@ services:
       - "5432:5432" # Expone el puerto 5432 en el host y 5432 para el Postgres dentro del contenedor
     volumes:
       - postgres_data_usuarios:/var/lib/postgresql/data # Persiste los datos fuera del contenedor
+    networks:
+      - observability
 
   db-agenda:
     image: postgres:14-alpine
@@ -152,6 +170,8 @@ services:
       - "5433:5432" # Mapeamos al puerto 5433 en el host para evitar conflicto con db-usuarios (5432)
     volumes:
       - postgres_data_agenda:/var/lib/postgresql/data
+    networks:
+      - observability
 
   db-tutorias:
     image: postgres:14-alpine
@@ -164,6 +184,8 @@ services:
       - "5434:5432" # Se mapea el puerto 5434 en el host para evitar conflicto con db-usuarios (5432)
     volumes:
       - postgres_data_tutorias:/var/lib/postgresql/data
+    networks:
+      - observability
   
   toxiproxy:
     image: shopify/toxiproxy
@@ -171,6 +193,38 @@ services:
     ports:
     - "8474:8474"    # API de Toxiproxy
     - "8666:8666"    # Puerto de proxy para ms-usuarios
+    networks:
+      - observability
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - ms-tutorias
+      - ms-usuarios
+      - ms-agenda
+      - ms-notificaciones
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    ports:
+      - "3004:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin         # Usuario
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Contraseña
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - observability
 
 
 # --- Definición de Volúmenes ---
@@ -179,3 +233,8 @@ volumes:
   postgres_data_agenda:
   postgres_data_tutorias:
   rabbitmq_data:
+  grafana_data:
+
+networks:
+  observability:
+    driver: bridge

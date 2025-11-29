@@ -1,7 +1,6 @@
 const axios = require('axios');
 const { usuariosServiceUrl } = require('../../config');
 const CircuitBreaker = require('opossum');
-const { track } = require('../../utils/dashboard'); // asegúrate de tener esta función
 
 // Función original, solo agregamos timeout
 const callUsuarioService = async (tipo, id, correlationId) => {
