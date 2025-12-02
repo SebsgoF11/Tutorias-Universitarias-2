@@ -47,3 +47,15 @@ spec:
               value: "http://ms-agenda-service:3002/agenda"
             - name: MS_NOTIFICACIONES_URL
               value: "http://ms-notificaciones-service:3003/notificaciones"
+            - name: DB_HOST
+              value: db-tutorias
+            - name: DB_PORT
+              value: "5432" 
+            - name: DB_USER
+              value: user_tutorias
+            - name: DB_PASSWORD
+              value: password_tutorias 
+            - name: DB_NAME
+              value: db_tutorias
+            - name: RABBITMQ_URL
+              value: amqp://user:password@rabbitmq:5672

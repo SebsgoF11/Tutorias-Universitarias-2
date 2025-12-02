@@ -40,3 +40,5 @@ spec:
               value: "ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD"
             - name: JWT_EXPIRES_IN
               value: "1h"
+            - name: MS_USUARIOS_URL
+              value: http://ms-usuarios-service:3001/usuarios

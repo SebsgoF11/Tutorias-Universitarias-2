@@ -40,3 +40,15 @@ spec:
               value: "ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD"
             - name: JWT_EXPIRES_IN
               value: "1h"
+            - name: DB_HOST
+              value: db-agenda # Nombre del Service de la BD
+            - name: DB_PORT
+              value: "5432" # Puerto estándar de Postgres
+            - name: DB_USER
+              value: user_agenda
+            - name: DB_PASSWORD
+              value: password_agenda # ¡Asegúrate de que esta sea la contraseña correcta!
+            - name: DB_NAME
+              value: db_agenda
+            - name: RABBITMQ_URL
+              value: amqp://user:password@rabbitmq:5672

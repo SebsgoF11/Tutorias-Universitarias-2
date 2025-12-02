@@ -40,3 +40,7 @@ spec:
               value: "ESTE_ES_UN_SECRETO_PARA_DESARROLLO_NO_USAR_EN_PROD"
             - name: JWT_EXPIRES_IN
               value: "1h"
+            - name: PORT
+              value: "3003"
+            - name: RABBITMQ_URL
+              value: amqp://user:password@rabbitmq:5672 
